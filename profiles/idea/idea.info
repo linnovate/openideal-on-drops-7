@@ -1,0 +1,96 @@
+name = openideaL
+description = Install openideaL.
+version = VERSION
+core = 7.x
+
+;core's
+dependencies[] = block
+dependencies[] = color
+dependencies[] = comment
+dependencies[] = contextual
+dependencies[] = dashboard
+dependencies[] = help
+dependencies[] = image
+dependencies[] = list
+dependencies[] = menu
+dependencies[] = number
+dependencies[] = options
+dependencies[] = path
+dependencies[] = taxonomy
+dependencies[] = dblog
+dependencies[] = search
+dependencies[] = shortcut
+dependencies[] = overlay
+dependencies[] = field_ui
+dependencies[] = file
+dependencies[] = rdf
+
+;contribs
+dependencies[] = addressfield
+dependencies[] = admin_menu
+dependencies[] = admin_menu_toolbar
+dependencies[] = boxes
+dependencies[] = context_ui
+dependencies[] = contextphp
+dependencies[] = date_popup
+dependencies[] = date_views
+dependencies[] = defaultcontent
+dependencies[] = email_confirm
+dependencies[] = entityreference
+dependencies[] = faq
+dependencies[] = features
+dependencies[] = field_group
+dependencies[] = filefield_sources
+dependencies[] = flag
+dependencies[] = flag_abuse
+dependencies[] = google_chart_tools
+dependencies[] = forward
+dependencies[] = htmlmail
+dependencies[] = ideal_comments
+dependencies[] = imce_mkdir
+dependencies[] = imce_wysiwyg
+dependencies[] = libraries
+dependencies[] = login_destination
+dependencies[] = logintoboggan_rules
+dependencies[] = message
+dependencies[] = metatag_opengraph
+dependencies[] = module_filter
+dependencies[] = nodequeue
+dependencies[] = page_title
+dependencies[] = quicktabs
+dependencies[] = radioactivity
+dependencies[] = rules_admin
+dependencies[] = search_autocomplete
+dependencies[] = top_searches
+dependencies[] = userpoints_rules
+dependencies[] = video_embed_field
+dependencies[] = views_bulk_operations
+dependencies[] = views_data_export
+dependencies[] = views_php
+dependencies[] = views_ui
+dependencies[] = voting_rules
+dependencies[] = vud_field
+dependencies[] = watcher
+dependencies[] = webform
+dependencies[] = social_buttons
+dependencies[] = wysiwyg_filter
+
+;customs
+dependencies[] = ideal_main
+dependencies[] = ideal_challenge
+dependencies[] = ideal_analytics
+dependencies[] = add_idea_autocomplete
+
+;features
+dependencies[] = fe_challenge
+dependencies[] = fe_idea
+dependencies[] = fe_default
+dependencies[] = fe_merge
+dependencies[] = fe_news
+dependencies[] = fe_default
+dependencies[] = fe_user
+dependencies[] = fe_user_activity
+
+
+
+files[] = openideal.profile
