@@ -100,9 +100,9 @@ settings[sasson_breadcrumb_showtitle] = 0
 settings[sasson_breadcrumb_separator] = '»'
 settings[sasson_feed_icons] = 0
 
-; Information added by drupal.org packaging script on 2012-08-03
-version = "7.x-1.x-dev"
+; Information added by drupal.org packaging script on 2012-08-14
+version = "7.x-1.0"
 core = "7.x"
 project = "plato"
-datestamp = "1343954473"
+datestamp = "1344958942"
 
