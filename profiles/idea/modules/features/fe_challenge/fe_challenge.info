@@ -46,3 +46,10 @@ features[variable][] = "upload_challenge"
 features[views_view][] = "challenges_list"
 features[views_view][] = "default_challenge"
 features[views_view][] = "ideas_in_challenge"
+
+; Information added by drupal.org packaging script on 2012-08-10
+version = "7.x-1.0-beta4"
+core = "7.x"
+project = "idea"
+datestamp = "1344611841"
+

@@ -42,3 +42,10 @@ features[variable][] = "page_title_type_news"
 features[variable][] = "page_title_type_news_showfield"
 features[variable][] = "show_diff_inline_news"
 features[variable][] = "show_preview_changes_news"
+
+; Information added by drupal.org packaging script on 2012-08-10
+version = "7.x-1.0-beta4"
+core = "7.x"
+project = "idea"
+datestamp = "1344611841"
+

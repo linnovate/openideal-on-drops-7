@@ -38,3 +38,10 @@ features[variable][] = "watcher_notifications_templates_footer_anonymous_notify"
 features[variable][] = "watcher_notifications_templates_footer_confirm"
 features[variable][] = "watcher_notifications_templates_header"
 features[variable][] = "watcher_toggle_link_in_teaser"
+
+; Information added by drupal.org packaging script on 2012-08-10
+version = "7.x-1.0-beta4"
+core = "7.x"
+project = "idea"
+datestamp = "1344611841"
+
