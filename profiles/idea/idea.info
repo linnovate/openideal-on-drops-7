@@ -1,5 +1,5 @@
 name = openideaL
-description = Install openideaL.
+description = OpenideaL installation profile (Distribution)
 version = VERSION
 core = 7.x
 
