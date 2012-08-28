@@ -99,11 +99,6 @@ h1 {
 h2.block-title {
   font-size: 18px;
   margin: 16px 0 3px;
-
-  #main & {
-    text-align: center;
-    background: #f6f6f6;
-  }
 }
 .fieldset-wrapper {
   font-size: .8em;
@@ -242,14 +237,10 @@ a:active {
   ul.menu,
   ul.category-menu {
     margin: .3em 0 .3em;
-    padding: 0;
+    padding: 0 0 0 10px;
     li {
-      list-style: none;
-      margin: 0;
-      ul {
-        padding: 0 0 0 10px;
-        margin: .3em 0 .3em;
-      }
+      margin: 0 0 0 0.5em;
+      font-size: .85em;
     }
   }
 }
@@ -314,13 +305,9 @@ table {
   }
 }
 
-
 /*-----------------------------------------------
                  Front Page
 -----------------------------------------------*/
-.region-content .block:first-child h2.block-title {
-  margin-top: 0;
-}
 
 /*-----------------------------------------------
                  Inner Pages
@@ -348,7 +335,6 @@ table {
       list-style: none;
       display: inline;
       padding: 0 5px;
-      margin: 0;
 
       a {
         font-size: .8em;
@@ -394,7 +380,6 @@ form.comment-form {
       display: inline-block;
       font-weight: normal;
       font-size: .85em;
-      margin-right: -1px;
       width: 20%;
     }
     input.form-text {
@@ -432,17 +417,12 @@ form.comment-form {
 /* -----  Search  ----- */
 #block-search-form {
   border: none;
-  background: none;
+  beckground: none;
   margin: 0px;
   padding: 0px;
 
-  .form-type-textfield {
-    display: inline-block;
-  }
-  .ac_input {
-    background-position: 100% 6px;
-  }
-  .form-submit {
-    margin: 0;
+  input.form-text {
+    height: 16px;
+    width: 60%;
   }
 }

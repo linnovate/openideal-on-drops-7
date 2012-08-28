@@ -1,5 +1,5 @@
 name = openideaL
-description = OpenideaL installation profile (Distribution)
+description = Install openideaL.
 version = VERSION
 core = 7.x
 
@@ -35,7 +35,7 @@ dependencies[] = contextphp
 dependencies[] = date_popup
 dependencies[] = date_views
 dependencies[] = defaultcontent
-dependencies[] = email_confirm
+;dependencies[] = email_confirm
 dependencies[] = entityreference
 dependencies[] = faq
 dependencies[] = features
@@ -94,3 +94,10 @@ dependencies[] = fe_user_activity
 
 
 files[] = openideal.profile
+
+; Information added by drupal.org packaging script on 2012-08-26
+version = "7.x-1.0-beta7"
+core = "7.x"
+project = "idea"
+datestamp = "1345970292"
+

@@ -32,9 +32,9 @@ features[rules_config][] = rules_oi_log_activity_when_a_node_is_voted_by_other
 features[variable][] = heartbeat_profile_message_templates
 features[views_view][] = user_activity
 
-; Information added by drupal.org packaging script on 2012-08-10
-version = "7.x-1.0-beta4"
+; Information added by drupal.org packaging script on 2012-08-26
+version = "7.x-1.0-beta7"
 core = "7.x"
 project = "idea"
-datestamp = "1344611841"
+datestamp = "1345970292"
 

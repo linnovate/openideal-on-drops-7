@@ -11,9 +11,9 @@ files[] = views/views_handler_argument_idea_comment_only_user_uid.inc
 files[] = views/views_handler_filter_idea_comment_only_user_uid.inc
 
 
-; Information added by drupal.org packaging script on 2012-08-10
-version = "7.x-1.0-beta4"
+; Information added by drupal.org packaging script on 2012-08-26
+version = "7.x-1.0-beta7"
 core = "7.x"
 project = "idea"
-datestamp = "1344611841"
+datestamp = "1345970292"
 
