@@ -26,17 +26,17 @@ function fe_default_context_default_contexts() {
   $context->reactions = array(
     'block' => array(
       'blocks' => array(
-        'ideal_main-category_list' => array(
-          'module' => 'ideal_main',
-          'delta' => 'category_list',
-          'region' => 'sidebar_first',
-          'weight' => '-9',
+        'panels_mini-header' => array(
+          'module' => 'panels_mini',
+          'delta' => 'header',
+          'region' => 'navigation',
+          'weight' => '-10',
         ),
-        'search-form' => array(
-          'module' => 'search',
-          'delta' => 'form',
-          'region' => 'sidebar_first',
-          'weight' => '-29',
+        'panels_mini-footer' => array(
+          'module' => 'panels_mini',
+          'delta' => 'footer',
+          'region' => 'footer',
+          'weight' => '10',
         ),
       ),
     ),

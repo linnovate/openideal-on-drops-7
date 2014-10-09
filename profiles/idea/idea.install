@@ -27,6 +27,16 @@ function idea_install() {
         'weight' => 2,
         'status' => 1,
       ),
+      // Mentions filter.
+      'filter_mentions' => array(
+        'weight' => 3,
+        'status' => 1,
+      ),
+      // Hashtags filter.
+      'filter_hashtags' => array(
+        'weight' => 4,
+        'status' => 1,
+      ),
       // HTML corrector filter.
       'filter_htmlcorrector' => array(
         'weight' => 10,
@@ -52,6 +62,16 @@ function idea_install() {
         'weight' => 1,
         'status' => 1,
       ),
+      // Mentions filter.
+      'filter_mentions' => array(
+        'weight' => 3,
+        'status' => 1,
+      ),
+      // Hashtags filter.
+      'filter_hashtags' => array(
+        'weight' => 4,
+        'status' => 1,
+      ),
       // HTML corrector filter.
       'filter_htmlcorrector' => array(
         'weight' => 10,
@@ -62,25 +82,28 @@ function idea_install() {
   $full_html_format = (object) $full_html_format;
   filter_format_save($full_html_format);
 
+  // Set path for homepage
+  variable_set('site_frontpage', 'front');
+
   // Set admin and default theme
   $enable = array(
-    'theme_default' => 'plato',
-    'admin_theme' => 'seven',
+    'theme_default' => 'socrates',
+    'admin_theme' => 'ember',
   );
   theme_enable($enable);
-   
+
   foreach ($enable as $var => $theme) {
     if (!is_numeric($var)) {
       variable_set($var, $theme);
     }
   }
-   
+
   // Disable the default Bartik theme
   theme_disable(array('bartik'));
 
   // Enable some openideal blocks.
-  $default_theme = variable_get('theme_default', 'plato');
-  $admin_theme = 'seven';
+  $default_theme = variable_get('theme_default', 'socrates');
+  $admin_theme = 'ember';
   $blocks = array(
     array(
       'module' => 'system',
@@ -91,6 +114,17 @@ function idea_install() {
       'region' => 'content',
       'pages' => '',
       'cache' => -1,
+    ),
+    array(
+      'module' => 'ideal_idea',
+      'delta' => 'new_idea_open_popup',
+      'theme' => $default_theme,
+      'status' => 1,
+      'weight' => 1,
+      'region' => 'content',
+      'pages' => '',
+      'cache' => -1,
+      'types' => array('idea'),
     ),
 //    array(
 //      'module' => 'search',
@@ -204,10 +238,21 @@ function idea_install() {
 //    ),
   );
   $query = db_insert('block')->fields(array('module', 'delta', 'theme', 'status', 'weight', 'region', 'pages', 'cache'));
+  $query_type = db_insert('block_node_type')->fields(array('module', 'delta', 'type'));
+  $t=0;
   foreach ($blocks as $block) {
     $query->values($block);
+    if(isset($block['types'])){
+      foreach($block['types'] as $key => $type){
+        $block['type'] = $type;
+        $query_type->values($block);
+        $t++;
+      }
+    }
   }
   $query->execute();
+  if($t > 0)
+    $query_type->execute();
 
   // Insert default pre-defined node types into the database. For a complete
   // list of available node type attributes, refer to the node type API
@@ -417,9 +462,12 @@ function idea_install() {
   // Set this as the administrator role.
   variable_set('user_admin_role', $admin_role->rid);
 
-  // Assign user 1 the "administrator" role.
+  // Assign user 1 and 2 the "administrator" role.
   db_insert('users_roles')
     ->fields(array('uid' => 1, 'rid' => $admin_role->rid))
+    ->execute();
+  db_insert('users_roles')
+    ->fields(array('uid' => 2, 'rid' => $admin_role->rid))
     ->execute();
 
  /* // Create a Home link in the main menu.
@@ -437,8 +485,82 @@ function idea_install() {
   db_update('system')
     ->fields(array('status' => 1))
     ->condition('type', 'theme')
-    ->condition('name', 'seven')
+    ->condition('name', 'ember')
     ->execute();
-  variable_set('admin_theme', 'seven');
+  variable_set('admin_theme', 'ember');
   variable_set('node_admin_theme', '1');
+
+  // Default settings for HybridAuth.
+  variable_set('hybridauth_duplicate_emails', '2');
+  variable_set('hybridauth_email_verification', '2');
+  variable_set('hybridauth_register', '1');
+  variable_set('hybridauth_registration_username_change', '1');
+  variable_set('hybridauth_required_fields', array(
+    'email' => 'email',
+    'firstName' => 'firstName',
+    'lastName' => 'lastName',
+    'gender' => 'gender',
+  ));
+
+  // Enable panels for node & term view.
+  variable_set('page_manager_node_view_disabled', 0);
+  variable_set('page_manager_term_view_disabled', 0);
+
+  // Default settings for jquery_update.
+  variable_set('jquery_update_jquery_cdn', 'jquery');
+  variable_set('jquery_update_jquery_version', '1.7');
+
+  // Setup hastags for idea content type.
+  $field_name = variable_get('hashtags_terms_field', '');
+  $instance = field_info_instance('node', $field_name, 'idea');
+  if (!is_array($instance)) {
+    $instance = array(
+      'field_name' => $field_name,
+      'entity_type' => 'node',
+      'label' => 'Hashtags',
+      'bundle' => 'idea',
+      'widget' => array(
+        'type' => 'taxonomy_autocomplete',
+        'weight' => -4,
+      ),
+      'display' => array(
+        'default' => array(
+          'type' => 'taxonomy_term_reference_link',
+          'weight' => 10,
+        ),
+        'teaser' => array(
+          'type' => 'taxonomy_term_reference_link',
+          'weight' => 10,
+        ),
+      ),
+    );
+    field_create_instance($instance);
+  }
+
+  // Setup user mentions defaults.
+  $override = array(
+    'input' => array(
+      'prefix' => '@',
+      'suffix' => '',
+    ),
+    'output' => array(
+      'prefix' => '@',
+      'suffix' => '',
+      'text' => '[user:name]',
+      'link' => 'user/[user:uid]',
+    ),
+  );
+  variable_set('mentions', $override);
+
+  //create default roles
+  user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, array('administer hashtags', 'use mentions suggestions'));
+
+  // Default setting for dragdropfile.
+  variable_set('dragdropfile_cancel_all_drops', 1);
+
+  //default setting for idea title autocomplete
+  variable_set('idea_add_autocomplete', TRUE);
+
+  //turn of error message display by default
+  variable_set('error_level', 0);
 }

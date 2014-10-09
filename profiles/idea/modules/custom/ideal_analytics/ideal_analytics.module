@@ -53,8 +53,9 @@ function ideal_analytics_analytics_dashboard() {
   // Chart for Nodes by category.
   //==================================
   $voc = taxonomy_vocabulary_machine_name_load('categories');
-  $tree = taxonomy_get_tree($voc->vid);
+  $tree = !empty($voc) && is_object($voc) ? taxonomy_get_tree($voc->vid) : array();
   $header = array();
+  $terms = array();
   foreach ($tree as $term) {
     $header[] = $term->name;
     $query = db_select('taxonomy_index', 'ti');
@@ -90,10 +91,12 @@ function ideal_analytics_analytics_dashboard() {
   //=====================================
   $nodes = $header = array();
   $in_action = field_info_field('field_in_action');
-  foreach ($in_action['settings']['allowed_values'] as $k => $value) {
-    $header[] = $value;
-    // The number of nodes created each day.
-    $nodes[] = db_query("SELECT COUNT(*) FROM {field_data_field_in_action} WHERE field_in_action_value = :value", array(':value' => $k))->fetchField();
+  if(!empty($in_action) && isset($in_action['settings']['allowed_values'])){
+    foreach ($in_action['settings']['allowed_values'] as $k => $value) {
+      $header[] = $value;
+      // The number of nodes created each day.
+      $nodes[] = db_query("SELECT COUNT(*) FROM {field_data_field_in_action} WHERE field_in_action_value = :value", array(':value' => $k))->fetchField();
+    }
   }
   
   $columns = array('Projects in progress');
@@ -165,4 +168,40 @@ function ideal_analytics_analytics_dashboard() {
   $ret[] = draw_chart($settings);
   
   return $ret;
+}
+
+/* Create a block for each graph */
+function ideal_analytics_block_info() {
+  //load analytics module
+  module_load_include('inc', 'analytics_dashboard', 'analytics_dashboard.charts');
+  $charts = analytics_dashboard_get_charts();
+  $visibles = variable_get('chart_visible', array());
+  foreach ($charts as $chart) {
+    if (in_array($chart['id'], $visibles, TRUE)) {
+      $blocks[$chart['id']] = array(
+        'info' => t('Graph').': '.$chart['title'],
+        'cache' => DRUPAL_NO_CACHE,
+      );
+      
+    }
+  }
+
+  return $blocks;
+}
+/* Display graph block */
+function ideal_analytics_block_view($delta = '') {
+  //load analytics module
+  module_load_include('inc', 'analytics_dashboard', 'analytics_dashboard.charts');
+  $charts = analytics_dashboard_get_charts();
+  $visibles = variable_get('chart_visible', array());
+
+  $block = array();
+  foreach ($charts as $chart) {
+    if (in_array($chart['id'], $visibles, TRUE) && $chart['id'] == $delta) {
+      $block['subject'] = t('Graph').': '.$chart['title'];
+      $block['content'] = $chart['markup'];
+      
+    }
+  }
+  return $block;
 }

@@ -17,39 +17,9 @@ function fe_idea_menu_default_menu_links() {
     'router_path' => 'ideas',
     'link_title' => 'Ideas',
     'options' => array(
-      'attributes' => array(),
-    ),
-    'module' => 'menu',
-    'hidden' => '0',
-    'external' => '0',
-    'has_children' => '0',
-    'expanded' => '0',
-    'weight' => '-47',
-  );
-  // Exported menu link: main-menu:in-action
-  $menu_links['main-menu:in-action'] = array(
-    'menu_name' => 'main-menu',
-    'link_path' => 'in-action',
-    'router_path' => 'in-action',
-    'link_title' => 'Ideas in action',
-    'options' => array(
-      'attributes' => array(),
-    ),
-    'module' => 'menu',
-    'hidden' => '0',
-    'external' => '0',
-    'has_children' => '0',
-    'expanded' => '0',
-    'weight' => '-46',
-  );
-  // Exported menu link: main-menu:node/add/idea
-  $menu_links['main-menu:node/add/idea'] = array(
-    'menu_name' => 'main-menu',
-    'link_path' => 'node/add/idea',
-    'router_path' => 'node/add/idea',
-    'link_title' => 'Add Idea',
-    'options' => array(
-      'attributes' => array(),
+      'attributes' => array(
+        'title' => '',
+      ),
     ),
     'module' => 'menu',
     'hidden' => '0',
@@ -58,9 +28,9 @@ function fe_idea_menu_default_menu_links() {
     'expanded' => '0',
     'weight' => '-48',
   );
-  // Exported menu link: main-menu:user/login
-  $menu_links['main-menu:user/login'] = array(
-    'menu_name' => 'main-menu',
+  // Exported menu link: user-menu:user/login
+  $menu_links['user-menu:user/login'] = array(
+    'menu_name' => 'user-menu',
     'link_path' => 'user/login',
     'router_path' => 'user/login',
     'link_title' => 'Login',
@@ -75,13 +45,11 @@ function fe_idea_menu_default_menu_links() {
     'external' => '0',
     'has_children' => '0',
     'expanded' => '0',
-    'weight' => '-49',
+    'weight' => '-50',
   );
   // Translatables
   // Included for use with string extractors like potx.
-  t('Add Idea');
   t('Ideas');
-  t('Ideas in action');
   t('Login');
 
 

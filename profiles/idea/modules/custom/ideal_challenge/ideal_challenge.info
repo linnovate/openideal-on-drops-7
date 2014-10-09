@@ -1,12 +1,9 @@
 name = Ideal Challenge
 description = Custom module.
 core = 7.x
-package = openidaeL
+package = openideaL
 files[] = context/ideal_challenge_context_condition.inc
 
-; Information added by drupal.org packaging script on 2012-08-26
-version = "7.x-1.0-beta7"
-core = "7.x"
-project = "idea"
-datestamp = "1345970292"
+dependencies[] = entity
+
 
