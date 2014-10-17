@@ -19,7 +19,7 @@ The module contain an example module which demonstrate how this module can be us
     )   
   );
 
-  //Draw it.
+  // Draw it.
   draw_chart($settings); 
 
 * The 'containterId' is optional and if it's not set the 'containerId' will be taken from chart ID ($settings['chart']['chart_id']).

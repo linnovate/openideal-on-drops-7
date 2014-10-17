@@ -89,11 +89,16 @@ function flag_views_data() {
   // Specialized is null/is not null filter.
   $data['flag_content']['flagged'] = array(
     'title' => t('Flagged'),
-    'help' => t('Filter to ensure content has or has not been flagged.'),
     'real field' => 'uid',
     'filter' => array(
       'handler' => 'flag_handler_filter_flagged',
       'label' => t('Flagged'),
+      'help' => t('Filter to ensure content has or has not been flagged.'),
+    ),
+    'sort' => array(
+      'handler' => 'flag_handler_sort_flagged',
+      'label' => t('Flagged'),
+      'help' => t('Sort by whether entities have or have not been flagged.'),
     ),
   );
 
@@ -241,7 +246,7 @@ function flag_views_flag_config_form($form_type, $content_type, $current_flag) {
  * Helper function that gets the first defined flag and returns its name.
  */
 function flag_views_flag_default($content_type) {
-  static $default_flag = array();
+  $default_flag = &drupal_static(__FUNCTION__, array());
 
   if (!array_key_exists($content_type, $default_flag)) {
     $flag = array_shift(flag_get_flags($content_type));

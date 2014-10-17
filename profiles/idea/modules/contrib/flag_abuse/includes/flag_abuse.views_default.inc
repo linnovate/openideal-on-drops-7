@@ -42,7 +42,7 @@ function _flag_abuse_views_default_abuse_comment(&$views, $flags) {
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->display->display_options['title'] = 'Comment Abuse';
   $handler->display->display_options['access']['type'] = 'perm';
-  $handler->display->display_options['access']['perm'] = 'reset abuse flags';
+  $handler->display->display_options['access']['perm'] = 'administer_nodes';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
@@ -108,11 +108,11 @@ function _flag_abuse_views_default_abuse_comment(&$views, $flags) {
   $handler->display->display_options['empty']['text']['empty'] = FALSE;
   $handler->display->display_options['empty']['text']['content'] = 'No comments have been reported...';
   $handler->display->display_options['empty']['text']['format'] = 'plain_text';
-  /* Relationship: Flags: comment_abuse */
+  /* Relationship: Flags: abuse_comment */
   $handler->display->display_options['relationships']['flag_content_rel']['id'] = 'flag_content_rel';
   $handler->display->display_options['relationships']['flag_content_rel']['table'] = 'comment';
   $handler->display->display_options['relationships']['flag_content_rel']['field'] = 'flag_content_rel';
-  $handler->display->display_options['relationships']['flag_content_rel']['flag'] = 'comment_abuse';
+  $handler->display->display_options['relationships']['flag_content_rel']['flag'] = 'abuse_comment';
   $handler->display->display_options['relationships']['flag_content_rel']['user_scope'] = 'any';
   /* Relationship: Comment: Node */
   $handler->display->display_options['relationships']['nid']['id'] = 'nid';
@@ -203,7 +203,7 @@ function _flag_abuse_views_default_abuse_comment(&$views, $flags) {
   foreach ($flags as $flag_name => $flag_title) {
     $handler = $view->new_display('page', "Page: {$flag_title}", "page_{$flag_name}");
     $handler->display->display_options['defaults']['relationships'] = FALSE;
-    /* Relationship: Flags: comment_abuse */
+    /* Relationship: Flags: abuse_comment */
     $handler->display->display_options['relationships']['flag_content_rel']['id'] = 'flag_content_rel';
     $handler->display->display_options['relationships']['flag_content_rel']['table'] = 'comment';
     $handler->display->display_options['relationships']['flag_content_rel']['field'] = 'flag_content_rel';
@@ -240,7 +240,6 @@ function _flag_abuse_views_default_abuse_comment(&$views, $flags) {
     t('Comment Abuse'),
     t('more'),
     t('Apply'),
-    t('Reset'),
     t('Sort By'),
     t('Asc'),
     t('Desc'),
@@ -293,6 +292,13 @@ function _flag_abuse_views_default_abuse_node(&$views) {
       'field' => 'uid',
       'relationship' => 'flag_content_rel',
     ),
+    'uid_1' => array(
+      'label' => 'author',
+      'required' => 0,
+      'id' => 'uid_1',
+      'table' => 'node',
+      'field' => 'uid',
+    ),
   ));
   $handler->override_option('fields', array(
     'name_1' => array(
@@ -326,12 +332,13 @@ function _flag_abuse_views_default_abuse_node(&$views) {
       'id' => 'name',
       'table' => 'users',
       'field' => 'name',
+      'relationship' => 'uid_1',
     ),
     'body' => array(
       'label' => 'Body',
       'exclude' => 0,
       'id' => 'body',
-      'table' => 'node_revisions',
+      'table' => 'field_data_body',
       'field' => 'body',
       'relationship' => 'none',
     ),

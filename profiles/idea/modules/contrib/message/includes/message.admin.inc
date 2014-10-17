@@ -64,7 +64,7 @@ function message_user_admin_settings($form_state) {
   $form['purge']['message_purge_quota'] = array(
     '#type' => 'textfield',
     '#title' => t('Messages quota'),
-    '#description' => t('Maximal (approximate) amount of messages of this type.'),
+    '#description' => t('Maximal (approximate) amount of messages.'),
     '#default_value' => variable_get('message_purge_quota', NULL),
     '#element_validate' => array('element_validate_integer_positive'),
     '#states' => $states,
@@ -85,15 +85,107 @@ function message_user_admin_settings($form_state) {
   }
 
   $form['message_delete_on_entity_delete'] = array(
-    '#title' => t('Enable messages auto delete referencing these entities'),
+    '#title' => t('Auto delete messages referencing the following entities'),
     '#type' => 'select',
     '#multiple' => TRUE,
     '#options' => $options,
     '#default_value' => variable_get('message_delete_on_entity_delete', array('node', 'user', 'taxonomy_term', 'comment')),
-    '#description' => t('Messages that reference entities of these types will be deleted when the entity gets deleted.'),
+    '#description' => t('Messages that reference entities of these types will be deleted when the referenced entity gets deleted.'),
   );
 
+  // Display link to the copy form if the locale module is enabled.
+  if (module_exists('locale')) {
+    $form['links'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Other settings'),
+    );
+
+    $form['links']['text_copy'] = array(
+      '#markup' => l(t('Copy messages text fields from one language to others'), 'admin/config/system/message/text-copy'),
+    );
+  }
+
   return system_settings_form($form);
+}
+
+/**
+ * Menu callback; Texts copying settings form.
+ */
+function message_admin_text_copy($form, $form_state) {
+  // Only display the form if the locale module is enabled.
+  if (!module_exists('locale')) {
+    $form['_notice'] = array(
+      '#markup' => t('Copying messages text fields is dependent on the locale module.'),
+    );
+    return $form;
+  }
+
+  $languages = language_list();
+  $language_options = array(LANGUAGE_NONE => t('"Language none"'));
+  foreach ($languages as $langcode => $language) {
+    $language_options[$langcode] = $language->name;
+  }
+
+  $form['origin'] = array(
+    '#type' => 'select',
+    '#title' => t('Select a language to copy from'),
+    '#options' => $language_options,
+    '#required' => TRUE,
+  );
+
+  $form['destinations'] = array(
+    '#type' => 'select',
+    '#title' => t('Select languages to copy to'),
+    '#multiple' => TRUE,
+    '#options' => $language_options,
+    '#required' => TRUE,
+  );
+
+  $form['override'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Override existing text'),
+    '#description' => t('When checked, existing text in the destination languages will be overriden by the origin language.'),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Copy'),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit callback for the copy texts form.
+ */
+function message_admin_text_copy_submit($form, $form_state) {
+  $batch = array(
+    'title' => t('Copying messages texts betweem languages'),
+    'operations' => array(
+      array(
+        'message_admin_text_copy_batch',
+        array(
+          $form_state['values']['origin'],
+          $form_state['values']['destinations'],
+          $form_state['values']['override'],
+        ),
+      ),
+    ),
+    'init_message' => t('Starting message texts copying.'),
+    'progress_message' => t('Processed @current out of @total.'),
+    'error_message' => t('Message texts copying has encountered an error.'),
+  );
+
+  batch_set($batch);
+}
+
+/**
+ * Validate callback for the copy texts form.
+ */
+function message_admin_text_copy_validate($form, $form_state) {
+  if (in_array($form_state['values']['origin'], $form_state['values']['destinations'])) {
+    form_set_error('destinations', t('Cannot copy language values into itself.'));
+  }
 }
 
 /**
@@ -102,6 +194,9 @@ function message_user_admin_settings($form_state) {
 function message_type_form($form, &$form_state, $message_type, $op = 'edit') {
   if ($op == 'clone') {
     $message_type->description .= ' (cloned)';
+    // Save the original message type into form state so that the submit
+    // handler can clone its field instances.
+    $form_state['original_message_type'] = menu_get_object('entity_object', 4);
   }
 
   $form['description'] = array(
@@ -141,7 +236,7 @@ function message_type_form($form, &$form_state, $message_type, $op = 'edit') {
 
     $form['message_type_category'] = array(
       '#title' => t('Message type category'),
-      '#type' => 'select',
+      '#type' => count($options) > 1 ? 'select' : 'value',
       '#options' => $options,
       '#default_value' => $message_type->category,
       '#description' => t('Select the message type category.'),
@@ -161,7 +256,7 @@ function message_type_form($form, &$form_state, $message_type, $op = 'edit') {
     }
     $form['message_type_category'] = array(
       '#title' => t('Message type category'),
-      '#type' => 'item',
+      '#type' => count(message_type_category_load()) > 1 ? 'item' : 'value',
       '#markup' => $value,
     );
   }
@@ -175,9 +270,11 @@ function message_type_form($form, &$form_state, $message_type, $op = 'edit') {
   if (module_exists('locale')) {
     $options = array();
     foreach (language_list() as $key => $value) {
-      $options[$key] = $value->name;
+      if (!empty($value->enabled)) {
+        $options[$key] = $value->name;
+      }
     }
-    $field_language = !empty($form_state['values']['language']) ? $form_state['values']['language'] : key($options);
+    $field_language = !empty($form_state['values']['language']) ? $form_state['values']['language'] : language_default()->language;
     $form['language'] += array(
       '#type' => 'select',
       '#options' => $options,
@@ -220,20 +317,32 @@ function message_type_form($form, &$form_state, $message_type, $op = 'edit') {
     $form['token_tree'] = array(
       '#markup' => '<p>' . t("Optional: Install <a href='@token-url'>Token</a> module, to show a the list of available tokens.", array('@token-url' => 'http://drupal.org/project/token')) . '</p>',
     );
-
   }
+
+  $params = array(
+    '@url-rules' => 'http://drupal.org/project/rules',
+    '!link' => 'http://api.drupal.org/api/drupal/includes--bootstrap.inc/function/t/7',
+  );
 
   $form['argument_keys'] = array(
     '#title' => t('Replacement tokens'),
     '#type' => 'textfield',
     '#default_value' => implode(', ', (array) $message_type->argument_keys),
-    '#description' => t('A comma-separated list of replacement tokens, e.g. %title or !url, of which the message text makes use of. Each replacement token has to start with one of the special characters "@", "%" or "!". This character controls the sanitization method used, analogously to the <a href="!link">t()</a> function.', array('!link' => 'http://api.drupal.org/api/drupal/includes--bootstrap.inc/function/t/7')),
+    '#description' => t('Optional: For <a href="@url-rules">Rules</a> module, in order to set argument using Rules actions, a comma-separated list of replacement tokens, e.g. %title or !url, of which the message text makes use of. Each replacement token has to start with one of the special characters "@", "%" or "!". This character controls the sanitization method used, analogously to the <a href="!link">t()</a> function.', $params),
   );
 
   $form['data'] = array(
     // Placeholder for other module to add their settings, that should be added
     // to the data column.
     '#tree' => TRUE,
+  );
+
+
+  $form['data']['token options']['clear'] = array(
+    '#title' => t('Clear empty tokens'),
+    '#type' => 'checkbox',
+    '#description' => t('When this option is selected, empty tokens will be removed from display.'),
+    '#default_value' => isset($message_type->data['token options']['clear']) ? $message_type->data['token options']['clear'] : FALSE,
   );
 
   $form['data']['purge'] = array(
@@ -280,7 +389,7 @@ function message_type_form($form, &$form_state, $message_type, $op = 'edit') {
   $form['data']['purge']['days'] = array(
     '#type' => 'textfield',
     '#title' => t('Purge messages older than'),
-    '#description' => t('Maximal message age in days.'),
+    '#description' => t('Maximal message age in days, for messages of this type.'),
     '#default_value' => !empty($message_type->data['purge']['days']) ? $message_type->data['purge']['days'] : '',
     '#element_validate' => array('element_validate_integer_positive'),
     '#states' => $states,
@@ -328,8 +437,18 @@ function message_type_form_validate($form, $form_state) {
 function message_type_form_submit(&$form, &$form_state) {
   $message_type = entity_ui_form_submit_build_entity($form, $form_state);
   $message_type->argument_keys = array_filter(array_map('trim', explode(',', $message_type->argument_keys)));
-  // Save and go back.
   $message_type->save();
+
+  // If this was a clone operation, clone the field instances as well.
+  $op = $form_state['build_info']['args'][1];
+  if ($op == 'clone') {
+    $original_instances = field_info_instances('message', $form_state['original_message_type']->name);
+    foreach ($original_instances as $instance) {
+      $instance['bundle'] = $message_type->name;
+      field_create_instance($instance);
+    }
+  }
+
   $form_state['redirect'] = 'admin/structure/messages';
 }
 

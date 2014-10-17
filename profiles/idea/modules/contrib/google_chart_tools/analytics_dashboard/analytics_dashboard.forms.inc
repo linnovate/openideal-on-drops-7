@@ -4,21 +4,19 @@
  * Provides the filtering form on the analytics dashboard page.
  */
 
-
 /**
  * Provide a simple form to change time periods
  */
 function analytics_dashboard_form() {
   $form = array();
-  
+
   // Load some javascript for datepicker
   drupal_add_library('system', 'ui.datepicker');
   drupal_add_js('jQuery(document).ready(function(){jQuery( ".pickadate" ).datepicker({
       dateFormat: "dd.mm.yy",
       autoSize: true
-    });});', 'inline'); 
+    });});', 'inline');
 
-  
   $period_options = array(
     '1_week' => t('1 week'),
     '2_weeks' => t('2 weeks'),
@@ -52,14 +50,14 @@ function analytics_dashboard_form() {
   $form['custom_from'] = array(
     '#type' => 'textfield',
     '#size' => 10,
-    '#attributes' => array('class' => array('pickadate')),  
+    '#attributes' => array('class' => array('pickadate')),
     '#default_value' => isset($_GET['from']) ? filter_xss($_GET['from']) : '',
   );
 
   $form['custom_to'] = array(
     '#type' => 'textfield',
     '#size' => 10,
-    '#attributes' => array('class' => array('pickadate')),  
+    '#attributes' => array('class' => array('pickadate')),
     '#default_value' => isset($_GET['to']) ? filter_xss($_GET['to']) : '',
   );
 

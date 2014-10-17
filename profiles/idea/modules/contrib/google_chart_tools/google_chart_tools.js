@@ -4,13 +4,13 @@
  */
 
 // Load the Visualization API and the chart package.
-google.load("visualization", "1", {packages:["corechart", "gauge", "orgchart"]});
+google.load("visualization", "1", {packages:["corechart", "gauge", "orgchart", "geochart"]});
 
 (function($) {
   Drupal.behaviors.googleChart = {
     attach: function(context, settings) {
       google.setOnLoadCallback(drawChart);
-      // Callback that creates and populates a data table, 
+      // Callback that creates and populates a data table,
       // instantiates the chart, passes in the data and
       // draws it.
       function drawChart() {
@@ -18,8 +18,7 @@ google.load("visualization", "1", {packages:["corechart", "gauge", "orgchart"]})
         for (var chartId in settings.chart) {
           // Create the data table.
           var data = new google.visualization.DataTable();
-          
-          //OrgChart charts need a different format data table.
+          // OrgChart charts need a different format data table.
           if (settings.chart[chartId].chartType == "OrgChart") {
             data.addColumn('string', 'Title');
             data.addColumn('string', 'Parent');

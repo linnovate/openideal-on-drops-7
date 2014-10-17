@@ -21,7 +21,7 @@ function google_chart_tools_views_views_plugins() {
         'uses fields' => TRUE,
         'uses options' => TRUE,
         'uses row plugin' => FALSE,
-        'uses row class' => TRUE,  
+        'uses row class' => TRUE,
       ),
     )
   );

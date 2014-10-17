@@ -146,16 +146,31 @@ class MessageType extends Entity {
       'partial delta' => 0,
     );
 
-    $property = entity_metadata_wrapper('message_type', $this);
-    if (empty($property->$options['field name'])) {
-      // Field doesn't exist.
-      return;
+    $field_name = $options['field name'];
+    $params = array('%field' => $field_name);
+    if (!$field = field_info_field($field_name)) {
+      throw new MessageException(format_string('Field %field does not exist.', $params));
     }
+
+    if (empty($field['settings']['message_text'])) {
+      throw new MessageException(format_string('Field %field is not a message-text.', $params));
+    }
+
+    $property = entity_metadata_wrapper('message_type', $this);
+
+    if (empty($langcode) && module_exists('locale')) {
+      // Get the langcode from the current language.
+      global $language;
+      $langcode = $language->language;
+    }
+
     // Let the metadata wrapper deal with the language.
     $property = $property->language($langcode)->$options['field name'];
 
     $delta = $options['partial delta'];
-    if (!empty($options['partials']) && $delta >= $property->count()) {
+    $count = $field['cardinality'] == 1 ? 1 : $property->count();
+
+    if (!empty($options['partials']) && $delta >= $count) {
       // Delta is bigger than the existing field, so return early, to
       // prevent an error.
       return;
@@ -187,6 +202,9 @@ class MessageType extends Entity {
     // Clear the entity property info cache, as changed argument-keys result
     // in different entity property info.
     entity_property_info_cache_clear();
+
+    // Clear the field info cache, so extra fields info is purged.
+    _field_info_collate_fields(TRUE);
   }
 
   /**

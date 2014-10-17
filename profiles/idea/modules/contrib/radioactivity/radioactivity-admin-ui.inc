@@ -16,7 +16,6 @@ function radioactivity_admin_general_form() {
     '#type' => 'fieldset',
     '#title' => t('Security'),
     '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
     '#description' => t('Radioactivity security features prevent manipulation of popularity by 3rd parties.'),
   );
 
@@ -56,7 +55,6 @@ function radioactivity_admin_general_form() {
   $form['advanced'] = array(
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
     '#title' => t('Advanced'),
     '#description' => t('Advanced'),
   );
@@ -85,12 +83,18 @@ function radioactivity_admin_general_form() {
 
   $settings = "";
 
+  $form['memcache'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Memcached settings'),
+    '#collapsible' => TRUE,
+    '#description' => t('Settings for the Memcache incident storage'),
+  );
+
   if (class_exists("Memcache")) {
     $form['memcache'] = array(
       '#type' => 'fieldset',
       '#title' => t('Memcached settings'),
       '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
       '#description' => t('Settings for the Memcache incident storage'),
     );
 
@@ -118,6 +122,9 @@ function radioactivity_admin_general_form() {
     $settings .= "define('VAR_RADIOACTIVITY_MEMCACHED_HOST', '$host');" . PHP_EOL;
     $settings .= "define('VAR_RADIOACTIVITY_MEMCACHED_PORT', '$port');" . PHP_EOL;
   }
+  else {
+    $form['memcache']['#description'] = t('PHP memcache(d) extension is not enabled! Memcached storage type is not available.');
+  }
 
   $salt = variable_get('radioactivity_checksum_salt', 'undefined');
 
@@ -135,7 +142,6 @@ function radioactivity_admin_general_form() {
   $form['assist'] = array(
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
     '#title' => t('Configuration assist'),
   );
 

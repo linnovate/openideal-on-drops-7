@@ -16,7 +16,7 @@ function hook_draw_chart_alter(&$settings) {
       $header = array();
       foreach ($tree as $term) {
         // Feeds the header with terms names.
-        $header[] = $term->name; 
+        $header[] = $term->name;
         $query = db_select('taxonomy_index', 'ti');
         $query->condition('ti.tid', $term->tid, '=')
               ->fields('ti', array('nid'));
@@ -25,14 +25,19 @@ function hook_draw_chart_alter(&$settings) {
       }
       $columns = array('Content per category');
       $rows = array($terms);
-      
       // Replacing the data of the chart.
       $chart['chart']['chartCategory']['header'] = $header;
       $chart['chart']['chartCategory']['rows'] = $rows;
       $chart['chart']['chartCategory']['columns'] = $columns;
-      
       // Adding a colors attribute to the pie.
       $chart['chart']['chartCategory']['options']['colors'] = array('red', '#004411');
     }
   }
+}
+
+/**
+ * Implements hook_gct_types_alter().
+ */
+function hook_gct_types_alter(&$types) {
+  $types['OrgChart'] = t('Organizational Chart');
 }

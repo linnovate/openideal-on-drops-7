@@ -1,5 +1,9 @@
 <?php
 /**
+ * @file
+ * Install routine for dashboard
+ */
+/**
  * Implements hook_install().
  */
 function analytics_dashboard_install() {

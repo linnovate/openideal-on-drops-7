@@ -17,10 +17,12 @@ class RadioactivityMemcachedIncidentStorage extends RadioactivityIncidentStorage
    * Connect to the memcache server
    */
   private function connect() {
-    $mc = new Memcache();
-    $mc->addServer(VAR_RADIOACTIVITY_MEMCACHED_HOST, VAR_RADIOACTIVITY_MEMCACHED_PORT);
-    if (@$mc->connect(VAR_RADIOACTIVITY_MEMCACHED_HOST, VAR_RADIOACTIVITY_MEMCACHED_PORT)) {
-      return $mc;
+    if (class_exists("Memcache")) {
+      $mc = new Memcache();
+      $mc->addServer(VAR_RADIOACTIVITY_MEMCACHED_HOST, VAR_RADIOACTIVITY_MEMCACHED_PORT);
+      if (@$mc->connect(VAR_RADIOACTIVITY_MEMCACHED_HOST, VAR_RADIOACTIVITY_MEMCACHED_PORT)) {
+        return $mc;
+      }
     }
     return FALSE;
   }
@@ -46,6 +48,9 @@ class RadioactivityMemcachedIncidentStorage extends RadioactivityIncidentStorage
    */
   public function processIncidents() {
     $mc = $this->connect();
+    if (!$mc) {
+      return;
+    }
     $i = $mc->get("radioactivity_bottom");
     if (!$i) {
       $i = 0;
@@ -81,15 +86,6 @@ class RadioactivityMemcachedIncidentStorage extends RadioactivityIncidentStorage
     }
     else {
       return self::$memcachedEmitters;
-    }
-  }
-
-  /**
-   * Default emitter processing via ajax callback path
-   */
-  public function processEmitters() {
-    if (count(self::$memcachedEmitters) > 0) {
-      radioactivity_emitter_callback_data('memcache', self::$memcachedEmitters);
     }
   }
 

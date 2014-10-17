@@ -17,27 +17,27 @@ function hook_analytics_dashboard() {
     $query->condition('ti.tid', $term->tid, '=')
           ->fields('ti', array('nid'));
     $terms[] = $query->countQuery()->execute()->fetchField();
-    
+
   }
   $columns = array('Ideas in category');
   $rows = array($terms);
-  
+
   $settings = array();
-  $settings['chart']['chartCategory'] = array(  
+  $settings['chart']['chartCategory'] = array(
     'header' => $header,
     'rows' => $rows,
     'columns' => $columns,
-    'weight' => -10,  
+    'weight' => -10,
     'chartType' => 'PieChart',
-    'options' => array( 
-      'curveType' => "function", 
-      'is3D' => TRUE,  
+    'options' => array(
+      'curveType' => "function",
+      'is3D' => TRUE,
       'forceIFrame' => FALSE,
       'title' => 'Ideas per category',
       'width' => 500,
-      'height' => 300  
-    )   
+      'height' => 300
+    )
   );
   
-  return draw_chart($settings);  
+  return draw_chart($settings);
 }

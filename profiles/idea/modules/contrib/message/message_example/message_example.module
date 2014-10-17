@@ -13,16 +13,10 @@ include_once('message_example.features.inc');
 function message_example_node_insert($node) {
   // Save the message and assign it to the user realm. Since another user,
   // usually an admin might create the node, but populate the author field
-  // with another user, we make sure the user realm is populated with the
+  // with another user, we make sure the user is populated with the
   // node's author, instead of the acting user (although in most cases it
   // would be the same user).
-  // The following example demonstrates that we don't need to explicitly set
-  // the realm to the user, since if no realms are provided then the message
-  // is automatically assigned to the user passed in the function, or if no
-  // user object is provided, then to the acting user.
-  $account = user_load($node->uid);
-
-  $message = message_create('example_create_node', array('uid' => $account->uid));
+  $message = message_create('example_create_node', array('uid' => $node->uid));
   // Save reference to the node in the node reference field, and the
   // "publish" state (i.e. if the node is published or unpublished).
   $wrapper = entity_metadata_wrapper('message', $message);
@@ -60,51 +54,6 @@ function message_example_user_insert(&$edit, $account, $category) {
   $wrapper = entity_metadata_wrapper('message', $message);
   $wrapper->field_published->set($account->status);
   $wrapper->save();
-}
-
-/**
- * Message callback; Trim text of a body field and add "Ream more" link.
- *
- * As there is no token to retrieve a trimmed version of the body field that
- * is attached to the node or comment, we have a custom callback to handle it.
- *
- * @param $message
- *   The Message entity.
- *
- * @see views_trim_text()
- */
-function message_example_trim_body_text(Message $message) {
-  if (empty($message->field_comment_ref) && empty($message->field_node_ref)) {
-    return;
-  }
-
-  $wrapper = entity_metadata_wrapper('message', $message);
-  $entity_type = !empty($message->field_comment_ref) ? 'comment' : 'node';
-  $field_name = $entity_type == 'comment' ? 'field_comment_ref' : 'field_node_ref';
-
-  // The wrapper is now wrapping the node or the comment entity.
-  $wrapper = $wrapper->$field_name;
-  $field_name = $entity_type == 'comment' ? 'comment_body' : 'body';
-
-  if (!$wrapper->{$field_name}->value()) {
-    // Body field is empty.
-    return;
-  }
-
-  $body = $wrapper->{$field_name}->value->value();
-  $options = array(
-    'max_length' => 50,
-    'html' => TRUE,
-  );
-  $body_trimmed = views_trim_text($options, $body);
-  $uri = entity_uri($entity_type, $wrapper->value());
-
-  if (strlen($body) > strlen($body_trimmed)) {
-    // Add a "Read more" before the closing <p>.
-    $body_trimmed = substr_replace($body_trimmed, '... ' . l(t('Read more'), $uri['path'], $uri['options']) . '</p>', -4);
-  }
-
-  return $body_trimmed;
 }
 
 /**

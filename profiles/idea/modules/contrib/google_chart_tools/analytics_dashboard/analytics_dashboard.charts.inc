@@ -20,8 +20,7 @@ function analytics_dashboard_charts() {
       $header[$i] = date('d.m.y', $f);
       // The number of nodes created each day.
       $nodes[$i] = db_query("SELECT COUNT(*) FROM {node} WHERE FROM_UNIXTIME(created,'%d.%m.%y') = :dete", array(':dete' => $header[$i]))->fetchField();
-
-      $i ++;
+      $i++;
       $f = strtotime("+1 day", $f);
     }
     // Building the rows, array of the data point arrays.
@@ -29,7 +28,7 @@ function analytics_dashboard_charts() {
     // The labels for the rows.
     $columns = array('No. Of Contents');
 
-    // Put all the data into the settings array, 
+    // Put all the data into the settings array,
     // which will be send to draw.
 
     // Must empty the array first.
@@ -38,17 +37,17 @@ function analytics_dashboard_charts() {
       'header' => $header,
       'rows' => $rows,
       'columns' => $columns,
-      'chartType' => 'LineChart',// LineChart, PieChart, ,ColumnChart, ,AreaChart, Gauge, BarChart, etc....
+      'chartType' => GOOGLE_CHART_TOOLS_DEFAULT_CHART,
       'options' => array( // Optionals.
         'curveType' => "function",
-        'forceIFrame' => FALSE,  
+        'forceIFrame' => FALSE,
         'title' => 'Content created per day',
         'width' => 500,
-        'height' => 300  
-      )   
+        'height' => 300
+      )
     );
 
-    //Draw it.
+    // Draw it.
     $ret[] = draw_chart($settings);
   }
   //=====================================
@@ -63,8 +62,7 @@ function analytics_dashboard_charts() {
       // The number of comments created each day.
       $comments[$i] = db_query("SELECT COUNT(*) FROM {comment} WHERE FROM_UNIXTIME(created,'%d.%m.%y') = :dete", array(':dete' => $header[$i]))->fetchField();
       // The number of voted placed each day.
-
-      $i ++;
+      $i++;
       $f = strtotime("+1 day", $f);
     }
     // Building the rows, array of the data point arrays.
@@ -72,27 +70,27 @@ function analytics_dashboard_charts() {
     // The labels for the rows.
     $columns = array('No. Of Comments');
 
-    // Put all the data into the settings array, 
+    // Put all the data into the settings array,
     // which will be send to draw.
 
     // Must empty the array first.
     $settings = array();
-    $settings['chart']['chartComments'] = array(  
+    $settings['chart']['chartComments'] = array(
       'header' => $header,
       'rows' => $rows,
       'columns' => $columns,
-      'chartType' => 'LineChart',// LineChart, PieChart, ,ColumnChart, ,AreaChart, Gauge, BarChart, etc....
+      'chartType' => GOOGLE_CHART_TOOLS_DEFAULT_CHART,
       'options' => array( // Optionals.
         'curveType' => "function",
-        'colors' => array('green'),   
-        'forceIFrame' => FALSE,  
+        'colors' => array('green'),
+        'forceIFrame' => FALSE,
         'title' => 'Comments created per day',
         'width' => 500,
-        'height' => 300  
-      )   
+        'height' => 300
+      )
     );
 
-    //Draw it.
+    // Draw it.
     $ret[] = draw_chart($settings);
   }
   //=====================================
@@ -106,8 +104,7 @@ function analytics_dashboard_charts() {
       $header[$i] = date('d.m.y', $f);
       // The number of voted placed each day.
       $votes[$i] = db_query("SELECT COUNT(*) FROM {votingapi_vote} WHERE  FROM_UNIXTIME(timestamp,'%d.%m.%y') = :dete", array(':dete' => $header[$i]))->fetchField();
-
-      $i ++;
+      $i++;
       $f = strtotime("+1 day", $f);
     }
     // Building the rows, array of the data point arrays.
@@ -115,28 +112,28 @@ function analytics_dashboard_charts() {
     // The labels for the rows.
     $columns = array('No. Of Votes');
 
-    // Put all the data into the settings array, 
+    // Put all the data into the settings array,
     // which will be send to draw.
 
     // Must empty the array first.
     $settings = array();
-    $settings['chart']['chartVotes'] = array(  
+    $settings['chart']['chartVotes'] = array(
       'header' => $header,
       'rows' => $rows,
       'columns' => $columns,
-      'chartType' => 'LineChart',// LineChart, PieChart, ,ColumnChart, ,AreaChart, Gauge, BarChart, etc....
+      'chartType' => GOOGLE_CHART_TOOLS_DEFAULT_CHART,
       'options' => array( // Optionals.
         'curveType' => "function",
-        'colors' => array('purple'),   
-        'forceIFrame' => FALSE,  
+        'colors' => array('purple'),
+        'forceIFrame' => FALSE,
         'title' => 'Votes placed per day',
         'width' => 500,
-        'height' => 300  
-      )   
+        'height' => 300
+      )
     );
 
-    //Draw it.
-    $ret[] = draw_chart($settings);  
+    // Draw it.
+    $ret[] = draw_chart($settings);
   }
   //=====================================
   // Chart for user joind per day.
@@ -149,8 +146,7 @@ function analytics_dashboard_charts() {
       $header[$i] = date('d.m.y', $f);
       // The number of users join each day.
       $users[$i] = db_query("SELECT COUNT(*) FROM {users} WHERE  FROM_UNIXTIME(created,'%d.%m.%y') = :dete", array(':dete' => $header[$i]))->fetchField();
-
-      $i ++;
+      $i++;
       $f = strtotime("+1 day", $f);
     }
     // Building the rows, array of the data point arrays.
@@ -158,7 +154,7 @@ function analytics_dashboard_charts() {
     // The labels for the rows.
     $columns = array('No. Of Users');
 
-    // Put all the data into the settings array, 
+    // Put all the data into the settings array,
     // which will be send to draw.
 
     // Must empty the array first.
@@ -167,19 +163,19 @@ function analytics_dashboard_charts() {
       'header' => $header,
       'rows' => $rows,
       'columns' => $columns,
-      'chartType' => 'LineChart',// LineChart, PieChart, ,ColumnChart, ,AreaChart, Gauge, BarChart, etc....
+      'chartType' => GOOGLE_CHART_TOOLS_DEFAULT_CHART,
       'options' => array( // Optionals.
         'curveType' => "function",
-        'colors' => array('orange'),   
-        'forceIFrame' => FALSE,  
+        'colors' => array('orange'),
+        'forceIFrame' => FALSE,
         'title' => 'Users joined per day',
         'width' => 500,
-        'height' => 300  
-      )   
+        'height' => 300
+      )
     );
 
-    //Draw it.
-    $ret[] = draw_chart($settings); 
+    // Draw it.
+    $ret[] = draw_chart($settings);
   }
   //=====================================
   // Chart for content by tags.
@@ -194,30 +190,28 @@ function analytics_dashboard_charts() {
       $query->condition('ti.tid', $term->tid, '=')
             ->fields('ti', array('nid'));
       $terms[] = $query->countQuery()->execute()->fetchField();
-
     }
     $columns = array('Content by Tags');
     $rows = isset($terms) ? array($terms) : array();
 
     $settings = array();
-    $settings['chart']['chartTag'] = array(  
+    $settings['chart']['chartTag'] = array(
       'header' => $header,
       'rows' => $rows,
       'columns' => $columns,
-      'chartType' => 'PieChart',// LineChart, PieChart, ,ColumnChart, ,AreaChart, Gauge, BarChart, etc....
+      'chartType' => 'PieChart',
       'options' => array( // Optionals.
-        'curveType' => "function", 
-        'is3D' => TRUE,  
+        'curveType' => "function",
+        'is3D' => TRUE,
         'forceIFrame' => FALSE,
         'title' => 'Content by Tags',
         'width' => 500,
-        'height' => 300  
-      )   
+        'height' => 300
+      )
     );
 
-    //Draw it.
-    $ret[] = draw_chart($settings);  
+    // Draw it.
+    $ret[] = draw_chart($settings);
   }
-  
   return $ret;
 }

@@ -9,3 +9,12 @@
   width: 20%;
   vertical-align: top;
 }
+
+.social-bottons .social-botton {
+  vertical-align: top;
+}
+
+.social-bottons .fb-like span {
+  vertical-align: initial;
+  margin-right: 26px;
+}

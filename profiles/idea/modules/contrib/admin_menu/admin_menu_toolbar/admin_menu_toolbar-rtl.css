@@ -1,0 +1,44 @@
+/* Remove border from all lists and actions */
+#admin-menu .dropdown .admin-menu-action a {
+  border-right: 0;
+}
+
+/**
+ * Administration menu.
+ */
+#admin-menu > div > .dropdown > li > a {
+  border-left: 0;
+  margin-bottom: 4px;
+  padding: 2px 10px 3px;
+}
+#admin-menu .dropdown .admin-menu-tab a {
+  border-left: 0;
+}
+#admin-menu .dropdown li li.expandable ul {
+  margin: -22px 160px 0 0;
+}
+
+/**
+ * Shortcuts toggle.
+ */
+#admin-menu .shortcut-toggle {
+  float: left;
+  margin: 0 1.3em 0 0;
+}
+
+/**
+ * Shortcuts widget.
+ */
+#admin-menu .shortcut-toolbar {
+  /* Align with icon; @see shortcut.css */
+  padding-right: 5px;
+}
+
+/* @see toolbar.css */
+#admin-menu .shortcut-toolbar li {
+  float: right;
+}
+
+div#toolbar a#edit-shortcuts {
+  top: 30px !important;
+}

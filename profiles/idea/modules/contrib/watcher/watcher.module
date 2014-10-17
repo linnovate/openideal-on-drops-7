@@ -355,6 +355,7 @@ function watcher_menu() {
     'title' => 'Watcher Toggle Watching Post',
     'page callback' => '_watcher_watch_toggle',
     'page arguments' => array(4),
+    'load arguments' => array(4),
     'access callback' => '_watcher_menu_access_toggle_watching_post',
     'access arguments' => array(1),
     'type' => MENU_CALLBACK
@@ -377,6 +378,7 @@ function watcher_menu() {
   $items['user/%user/watcher/toggle/%node/unwatch'] = array(
     'page callback' => '_watcher_watch_toggle',
     'page arguments' => array(4, 6, 'node', 7),
+    'load arguments' => array(4),
     'access callback' => '_watcher_menu_access_toggle_watching_post',
     'access arguments' => array(1),
     'type' => MENU_CALLBACK
@@ -385,6 +387,7 @@ function watcher_menu() {
   $items['user/%user/watcher/toggle/%node/unwatch-all'] = array(
     'page callback' => '_watcher_watch_toggle',
     'page arguments' => array(4, 6, 'all', 7),
+    'load arguments' => array(4),
     'access callback' => '_watcher_menu_access_toggle_watching_post',
     'access arguments' => array(1),
     'type' => MENU_CALLBACK
@@ -392,7 +395,7 @@ function watcher_menu() {
 
   // Administration Panel Settings
 
-  $items['admin/config/watcher'] = array(
+  $items['admin/config/people/watcher'] = array(
     'title' => 'Watcher',
     'description' => 'Modify the settings for Watcher module.',
     'page callback' => 'drupal_get_form',
@@ -401,7 +404,7 @@ function watcher_menu() {
     'type' => MENU_NORMAL_ITEM,
   ) + $base_include;
 
-  $items['admin/config/watcher/settings'] = array(
+  $items['admin/config/people/watcher/settings'] = array(
     'title' => 'Settings',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_watcher_admin_settings'),
@@ -409,7 +412,7 @@ function watcher_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
   ) + $base_include;
 
-  $items['admin/config/watcher/stats'] = array(
+  $items['admin/config/people/watcher/stats'] = array(
     'title' => 'Statistics',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_watcher_admin_stats'),
@@ -417,7 +420,7 @@ function watcher_menu() {
     'type' => MENU_LOCAL_TASK,
   ) + $base_include;
 
-  $items['admin/config/watcher/test'] = array(
+  $items['admin/config/people/watcher/test'] = array(
     'title' => 'Testing',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('_watcher_admin_test'),
@@ -1648,25 +1651,26 @@ function _watcher_help_page() {
  * TODO: Refactor into several functions
  */
 function _watcher_watch_toggle($node, $mail = NULL, $unwatch = NULL, $confirm = NULL) {
+  global $user;
+
   $nid = $node->nid;
   $token = $_REQUEST['token'];
 
   // Validate token
-  if (_watcher_get_token($node->nid) != $token) {
+  if (!drupal_valid_token($token, $node->nid . $user->uid, TRUE)) {
     drupal_set_message(t("You've followed an invalid link."));
     drupal_access_denied();
     return;
   }
 
-  global $user;
-
   // Are email notifications enabled?
   $email_notifications = variable_get('watcher_email_notifications_enabled', TRUE);
 
   // Is this an anonymous user?
-  $anonymous = !((bool) $user->uid);
+  $anonymous = user_is_anonymous();
 
   // If this is an anonymous user, we check to see if the user is already watching this node in current session
+  $watching = FALSE;
   if ($anonymous) {
     if (is_array($watches = _watcher_session('watching'))) {
       $watching = in_array($nid, $watches);
@@ -1747,11 +1751,12 @@ function _watcher_watch_toggle($node, $mail = NULL, $unwatch = NULL, $confirm = 
       // If this is the result of a form submission or regular request, render form in HTML
       // otherwise return JSON
       $watch_action = ($watching ? 'unwatch' : 'watch');
+      $form = drupal_get_form('_watcher_watch_toggle_anonymous_form', $nid, $watch_action);
       if ($_POST || !$async) {
-        return drupal_get_form('_watcher_watch_toggle_anonymous_form', $nid, $watch_action);
+        return drupal_render($form);
       }
       $nstatus['status'] = 'form';
-      $nstatus['data'] = drupal_get_form('_watcher_watch_toggle_anonymous_form', $nid, $watch_action);
+      $nstatus['data'] = drupal_render($form);
     }
   }
 
@@ -1786,7 +1791,7 @@ function _watcher_watch_toggle($node, $mail = NULL, $unwatch = NULL, $confirm = 
   // If this was an asynchronous request, see if a form was generated then output it
   // otherwise output of status of request
   if ($async) {
-    print drupal_json_encode($nstatus);
+    print drupal_json_output($nstatus);
   }
   else {
     drupal_set_message($message);
@@ -1806,7 +1811,7 @@ function _watcher_email_notifications_toggle($nid) {
   $token = $_REQUEST['token'];
 
   // Validate token
-  if (_watcher_get_token($nid) != $token) {
+  if (!drupal_valid_token($token, $nid . $uid, TRUE)) {
     drupal_set_message(t("You've followed an invalid link."));
     drupal_access_denied();
     return;
@@ -1829,7 +1834,7 @@ function _watcher_email_notifications_toggle($nid) {
 
   // If this was an asynchronous request - output JSON, otherwise redirect
   if ($async) {
-    print drupal_json_encode($nstatus);
+    print drupal_json_output($nstatus);
   }
   else {
     drupal_goto();
@@ -2090,6 +2095,8 @@ function _watcher_email_notify_anonymous_watch_confirm($user, $nid, $what = NULL
  *    Node object of the node that is now being watched
  */
 function _watcher_email_notify_anonymous_watch_confirm_add_to_queue($recipients, $subject, $node) {
+  $message = '';
+
   foreach ($recipients as $recipient) {
     // Get message body with tokens replaced
     $message .= _watcher_email_notifications_replace_tokens_anonymous_watch_confirm($node, $recipient);
@@ -2219,9 +2226,9 @@ function _watcher_user_autowatch_comment_insert($comment) {
  * Return a link for watching/unwatching a post
  */
 function _watcher_node_watch_link(&$node, $view_mode) {
-
   global $user;
-  $anonymous = !((bool) $user->uid);
+
+  $anonymous = user_is_anonymous();
 
   // If email notifications are disabled, no link will be shown to anonymous users
   // as email notifications must be enabled for anonymous users to be notified
@@ -2241,6 +2248,8 @@ function _watcher_node_watch_link(&$node, $view_mode) {
   static $called;
 
   // Is current user watching this node?
+  // Assuming FALSE by default
+  $watching = FALSE;
   if ($anonymous) {
     if (is_array($watches =  _watcher_session('watching'))) {
       $watching = in_array($node->nid, $watches);
@@ -2738,7 +2747,7 @@ function _watcher_email_notifications_replace_tokens_header_and_footer($recipien
   $link_query['token'] = _watcher_get_token($nid, $recipient->uid);
 
   // Start by replacing our own tokens
-  $recipient_username = $recipient->name;
+  $recipient_username = isset($recipient->name) ? $recipient->name : t('Anonymous');
   $recipient_user_settings_url = url('user/'. $recipient->uid .'/watcher/settings', array('absolute' => TRUE));
   $stop_watching_url = url('user/'. $recipient->uid .'/watcher/toggle/'. $nid . ( $recipient->uid ? '' : '/unwatch/'. $r_email ), array('absolute' => TRUE, 'query' => $link_query));
   $stop_watching_all_url = url('user/'. $recipient->uid .'/watcher/toggle/'. $nid .'/unwatch-all/'. $r_email, array('absolute' => TRUE, 'query' => $link_query));
@@ -3033,6 +3042,9 @@ function _watcher_watch_toggle_anonymous_form($form, &$form_submit, $nid, $watch
 
   // Load the mail footer template
   $templates = _watcher_admin_settings_field_value_templates();
+  // A substitution for the type variable, as soon as I don't see where we can get it.
+  // TODO: Check if $type is necessary at all.
+  $type = 'footer_confirm';
   $message = variable_get("watcher_notifications_templates_$type", $templates['footer_confirm']);
 
   // Determine if user's IP address token is included in template
@@ -3198,19 +3210,14 @@ function _watcher_user_settings_submit($form, $form_state) {
  */
 function _watcher_watch_toggle_anonymous_form_submit($form, $form_state) {
   global $user;
+
   $nid = $form_state['values']['nid'];
-  $what = $form_state['values']['what'];
   $watch_action = $form_state['values']['watch_action'];
   $node = node_load($nid);
 
   // Get user's IP, even when behind proxy/cache server
-  if (!($user->ip = $_SERVER['HTTP_X_FORWARDED_FOR'])) {
-    $user->ip = $_SERVER['REMOTE_ADDR'];
-  }
-
-  // Store form details in session for use later
-  _watcher_session('mail', $form_state['values']['mail']);
-  _watcher_session('what', $form_state['values']['what']);
+  // TODO: Check if this is really necessary
+  $user->ip = ip_address();
 
   // Add user's email to $user object
   $user->mail = $form_state['values']['mail'];
@@ -3237,6 +3244,11 @@ function _watcher_watch_toggle_anonymous_form_submit($form, $form_state) {
     }
   }
   else {
+    // Store form details in session for use later
+    _watcher_session('mail', $form_state['values']['mail']);
+    _watcher_session('what', $form_state['values']['what']);
+
+    $what = $form_state['values']['what'];
     if (_watcher_user_set_watching_node($nid, $user, $what)) {
 
       // Adapt message depending on what the user is watching for
@@ -3271,16 +3283,6 @@ function _watcher_get_token($seed, $uid = FALSE) {
     $uid = $GLOBALS['user']->uid;
   }
   return drupal_get_token($seed . $uid);
-}
-
-/**
- * Check to see if a token value matches the specified node.
- */
-function _watcher_check_token($token, $seed, $uid = FALSE) {
-  if ($uid === FALSE) {
-    $uid = $GLOBALS['user']->uid;
-  }
-  return drupal_get_token($seed . $uid) == $token;
 }
 
 /**

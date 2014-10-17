@@ -76,7 +76,7 @@ function social_buttons_field_instance_settings_form($field, $instance) {
       t('Get your Facebook Like button !here.', array('!here' => '<a href="http://developers.facebook.com/docs/reference/plugins/like" target="_blank">here</a>')) . "<br />" .
       t('Get your Twitter Share button !here.', array('!here' => '<a href="http://twitter.com/about/resources/buttons#tweet" target="_blank">here</a>')) . "<br />" .
       t('Get your Google+ button !here.', array('!here' => '<a href="http://www.google.com/webmasters/+1/button/" target="_blank">here</a>')) . "<br />" .
-      t('Get your Linkedin Share button !here.', array('!here' => '<a href="https://deovelper.linkedin.com/plugins/share-plugin-generator" target="_blank">here</a>')),
+      t('Get your Linkedin Share button !here.', array('!here' => '<a href="https://developer.linkedin.com/plugins/share-plugin-generator" target="_blank">here</a>')),
   );
  
   // Setting the form text areas for embed code.
@@ -143,13 +143,14 @@ function social_buttons_theme($existing, $type, $theme, $path) {
  * Theme function for display social buttons.
  */
 function theme_social_buttons($buttons) {
-  $output = '';
+  drupal_add_css(drupal_get_path('module', 'social_buttons') . '/social_buttons.css');
+  $output = '<div class="social-bottons">';
   foreach ($buttons as $button) {
     if (!empty($button)) {
-      $output .=  $button;
+      $output .= '<span class="social-botton">' . $button . '</span>';
     }
   }
-
+  $output .= '</div>';
   return $output;
 }
 

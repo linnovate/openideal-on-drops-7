@@ -3,9 +3,9 @@ description = Provide a Google Chart Tools Example.
 dependencies[] = google_chart_tools
 core = 7.x
 package = Charting
-; Information added by drupal.org packaging script on 2012-08-10
-version = "7.x-1.0"
+; Information added by drupal.org packaging script on 2013-03-19
+version = "7.x-1.4"
 core = "7.x"
 project = "google_chart_tools"
-datestamp = "1344606749"
+datestamp = "1363700278"
 

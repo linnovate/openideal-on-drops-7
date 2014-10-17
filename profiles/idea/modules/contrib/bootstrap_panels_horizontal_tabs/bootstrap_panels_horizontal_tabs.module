@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ * @param $module
+ * @param $plugin
+ * @return string
+ */
+function bootstrap_panels_horizontal_tabs_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'panels') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+/**
+ * Capture all pane titles in a static variable for use while rendering the region.
+ */
+function bootstrap_panels_horizontal_tabs_preprocess_panels_pane(&$vars) {
+  $pane_id = $vars['pane']->pid;
+  $pane_title = &drupal_static($pane_id . '_title');
+  $pane_title = $vars['title'];
+
+  $custom_js = drupal_get_path('module', 'bootstrap_panels_horizontal_tabs') . '/plugins/styles/bootstrap_panels_horizontal_tabs.js';
+  $custom_css = drupal_get_path('module', 'bootstrap_panels_horizontal_tabs') . '/plugins/styles/bootstrap_panels_horizontal_tabs.css';
+  drupal_add_js($custom_js, 'file');
+  drupal_add_css($custom_css, 'file');
+}

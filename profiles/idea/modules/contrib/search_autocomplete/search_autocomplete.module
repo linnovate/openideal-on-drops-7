@@ -12,72 +12,16 @@
  * www.axiomcafe.fr
  */
 
-
 include_once('search_autocomplete.admin.inc');
+include_once('search_autocomplete.view_autocomplete.inc');
+
 
 /**
- * Menu callback; autocomplete handler.
- * Creates suggestions for autocompletion according to settings
- * @param   string    the characters entered in the search boxs
- */
-function search_autocomplete_autocomplete($string = '') {
-  global $user;
-  global $language;
-
-  $matches        = array();
-  $word_items     = array(); 
-  $node_items     = array(); 
-  $user_items     = array();
-  $taxo_items     = array();
-  $comment_items  = array();
-  static $max_sug = 0;
-
-  $fid    = arg(1);                                       // get the form calling
-  $words = explode(' ', $string);                         // explode the words entered in the input string
-  $word   = $words[0];                                    // get the first word entered in the search box
-
-  $result = db_query('SELECT min_char FROM {search_autocomplete_forms} f WHERE f.fid = :fid', array(':fid' => $fid));
-  foreach ($result as $match) {
-    if (drupal_strlen($word) < $match->min_char) {        // Check if there if enough letter to start autocompletion.
-      drupal_json_output($matches);                       // no matches, return it empty
-      return;                                             // if there is not enough letters, stop here
-    }
-  }
-  
-  // get every suggestion types associated with the form being autocompleted
-  $result = db_query('SELECT * FROM {search_autocomplete_suggestions} s WHERE s.sug_fid = :fid AND s.sug_enabled = :sug_enabled ORDER BY s.sug_weight ASC', array(':fid' => $fid, 'sug_enabled' => 1));
-  foreach ($result as $item) {                            // while there is suggestion types to analyse:
-
-      $query    = $item->sug_query;
-      $prefix   = t($item->sug_prefix);                    // get the prefix for this suggestion type
-      $params   = array(':like_word' => '%'.$word.'%');
-      if (strpos($query, ':curr_lang')!== false) {
-        $params[':curr_lang'] = $language->language;
-      }
-      if (strpos($query, ':roles') !== false) {
-        $params[':roles'] = implode(',', array_keys($user->roles));
-      }
-      
-      $result = db_query($query,$params);
-      
-      foreach ($result as $obj) {
-        $sug_elem                   = array_shift(array_values(get_object_vars($obj)));
-        $sug                        = html_entity_decode(check_plain($sug_elem), ENT_QUOTES);
-        $sug_index                  = trim($prefix) . ' ' . $sug;
-        $matches[trim($sug_index)]  = trim($sug);         // add the suggestion to be returned
-      }
-  }
-  drupal_json_output($matches);                           // Return matches.
-}  // search_autocomplete_autocomplete()
-
-/**
- * HOOK OF INIT:
- * add autocomplete.js on everypage
+ * Implements hook_init().
+ * Add autocomplete.js on everypage.
  */
 function search_autocomplete_init() {
-  global $base_url;
-  global $language;
-  
+
   // checkout if user have authorization to access the autocompleted form
   if (user_access('use Search Autocomplete')) {
     // init:
@@ -90,40 +34,87 @@ function search_autocomplete_init() {
       // build the setting array to transfert to JS
       foreach ($result as $match) {
         $form_id = 'form' . $match->fid;
-        $params   = array(':lang_code'    => $language->language,
-                          ':lang_prefix'  => $language->prefix,
-                          ':lang_domain'  => $language->domain
-                          );
-        search_autocomplete_replaceArguments($match->selector, $params);
+        $input_data  = explode("\n", $match->data_static);
+        $data_static = array();
+        for ($i=0; $i < count($input_data); $i++) {
+          $cut = strripos($input_data[$i], '=>');
+          $object = array();
+          if ($cut > 0) {
+            $object['label']  = trim(substr($input_data[$i], 0, $cut));
+            $object['value']  = trim(substr($input_data[$i], 0, $cut));
+            $object['link']   = trim(substr($input_data[$i], $cut+2, strlen($input_data[$i])));
+          } 
+          else {
+            $object['label']  = trim($input_data[$i]);
+            $object['value']  = trim($input_data[$i]);
+          }
+          $data_static[] = $object;
+        }
         
+        $theme_id      = preg_replace("/\\.[^.\\s]{3,4}$/", "", $match->theme);
+        $data_source  = $match->data_callback;
+        if ($match->data_source == 1 && !url_is_external($match->data_callback)) {
+          $data_source = urldecode(url($match->data_callback, array('absolute' => TRUE)));
+        }
+
         drupal_add_js(array('search_autocomplete' => array(
-          $form_id      => array(
-            'selector'  => $match->selector,
-            'minChars'  => $match->min_char,
-            'max_sug'   => $match->max_sug,
-            'url'       => $base_url . '/search_autocomplete/' . $match->fid . '/autocomplete',
-            'fid'       => $match->fid
-          ))), 'setting');
+          $form_id          => array(
+            'selector'      => $match->selector,
+            'minChars'      => $match->min_char,
+            'max_sug'       => $match->max_sug,
+            'no_results'    => $match->no_results,
+            'type'          => $match->data_source,
+            'datas'         => $match->data_source > 1 ? $data_static : $data_source,
+            'fid'           => $match->fid,
+            'theme'         => str_replace(' ', '-', strtolower($theme_id)),    // get the css filename with '-' instead of ' ', lower case and no '.css'
+            'auto_submit'   => $match->auto_submit,
+            'auto_redirect' => $match->auto_redirect
+          )
+        )), 'setting');
+        drupal_add_css(drupal_get_path('module', 'search_autocomplete') . '/css/' . $match->theme);         
       }
       // If there is some results: need to include the css and js....
       if ($result) {
-        drupal_add_css(drupal_get_path('module', 'search_autocomplete') . '/css/jquery.autocomplete.css');
+        drupal_add_library('system', 'ui');
+        drupal_add_library('system', 'ui.widget');
+        drupal_add_library('system', 'ui.position');
+        drupal_add_library('system', 'ui.autocomplete');
         drupal_add_js(drupal_get_path('module', 'search_autocomplete') . '/js/jquery.autocomplete.js');
       }
     }
   }
+  
+  if (isset($_GET['sort_order'])) {
+    $_GET['sort_order'] = drupal_strtoupper($_GET['sort_order']);
+  }
+  
 } // search_autocomplete_init()
+
 
 /**
  * HELP FUNCTION: replace placeholders in the input string
  * @param $input  the string to be replaced
  * @param $args   the array of placeholders and values
  */
- function search_autocomplete_replaceArguments(&$input, &$args) {
+function search_autocomplete_replaceArguments(&$input, &$args) {
   $modified = FALSE;
   foreach ($args as $key => $data) {
     $input = preg_replace('#' . $key . '#', $data, $input);
     $modified = TRUE;
   }
   return $modified;
+}
+
+/**
+ * Helper function: get from database if suggestions should be translited
+ */
+function search_autocomplete_get_translite() {
+// get data in database and fetch it
+  $result = db_select('search_autocomplete_forms', 'f')
+    ->fields('f', array('translite'))
+    ->range(0, 1)
+    ->execute()
+    ->fetchField();
+
+  return $result;
 }

@@ -17,6 +17,10 @@ function message_install() {
     'cardinality' => FIELD_CARDINALITY_UNLIMITED,
     'translatable' => TRUE,
     'locked' => TRUE,
+    'settings' => array(
+      // Mark that this field can be rendered using Message::getText().
+      'message_text' => TRUE,
+    ),
   );
   $field = field_create_field($field);
   $instance = array(
@@ -234,7 +238,25 @@ function message_schema() {
       ),
     ),
     'primary key' => array('mid'),
+    'indexes' => array(
+      'type_index' => array('type'),
+      'timestamp' => array('timestamp'),
+    ),
   );
+
+  // Cache bins for Entity-cache module.
+  $cache_schema = drupal_get_schema_unprocessed('system', 'cache');
+  $types = array(
+    'message_type_category',
+    'message_type',
+    'message',
+  );
+
+  foreach ($types as $type) {
+    $schema["cache_entity_$type"] = $cache_schema;
+    $schema["cache_entity_$type"]['description'] = "Cache table used to store $type entity records.";
+  }
+
   return $schema;
 }
 
@@ -439,6 +461,7 @@ function message_update_7007(&$sandbox) {
         'language' => $langcode,
       ))
       ->condition('mid', $sandbox['last'], '>')
+      ->range(0, $batch_size)
       ->execute();
 
     $sandbox['last'] += $batch_size;
@@ -457,4 +480,50 @@ function message_update_7008() {
   $field = field_info_field(MESSAGE_FIELD_MESSAGE_TEXT);
   $field['cardinality'] = FIELD_CARDINALITY_UNLIMITED;
   field_update_field($field);
+}
+
+/**
+ * Mark message-text field as renderable using getText().
+ */
+function message_update_7009() {
+  $field = field_info_field(MESSAGE_FIELD_MESSAGE_TEXT);
+  $field['settings']['message_text'] = TRUE;
+  field_update_field($field);
+}
+
+/**
+ * Create cache bins for Entity-cache module.
+ */
+function message_update_7010() {
+  $cache_schema = drupal_get_schema_unprocessed('system', 'cache');
+  $types = array(
+    'message_type_category',
+    'message_type',
+    'message',
+  );
+
+  foreach ($types as $type) {
+    $schema["cache_entity_$type"] = $cache_schema;
+    $schema["cache_entity_$type"]['description'] = "Cache table used to store $type entity records.";
+  }
+
+  foreach ($schema as $name => $table) {
+    db_create_table($name, $table);
+  }
+}
+
+/**
+ * Add an index to message.type and message.timestamp.
+ */
+function message_update_7011() {
+  db_add_index('message', 'type', array('type'));
+  db_add_index('message', 'timestamp', array('timestamp'));
+}
+
+/**
+ * Update the message type index name to fix an sqlite issue.
+ */
+function message_update_7012() {
+  db_drop_index('message', 'type');
+  db_add_index('message', 'type_index', array('type'));
 }

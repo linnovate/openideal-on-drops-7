@@ -60,10 +60,17 @@ Partials
 The message body has multiple cardinallity, allowing to separate html markup
 from the actual message content, and also, allowing to only render a selected
 part of the message.
-If Views and Panels module are enabled, it is possible to render the
-message "partials" using the views module's "Panel fields" format.
+The partials are reflected in the "Manage display" page of every message type,
+allowing the administrator to re-order and hide them per view mode.
+Furthermore, if Views and Panels module are enabled, it is possible to render
+the message "partials" using the views module's "Panel fields" format.
 Enable the Message-example module to see it in action.
 
+View modes
+==========
+Message module exposes the "message-text" field(s) and allows an
+administrator to set visibility and order via "Manage display" page, e.g.
+admin/structure/messages/manage/[YOUR-MESSAGE-TYPE]/display
 
 Auto-purging
 ============
@@ -76,7 +83,7 @@ definition.
 
 * Message type purging definition
   Each message type my override the global purging settings. Under
-  admin/structure/messages/manage/[your_message_type], clicking the
+  admin/structure/messages/manage/[YOUR-MESSAGE-TYPE], clicking the
   "Override global settings" checkbox will make the global settings ignore the
   current message type and will allow to set purging definitions for the current
   type.

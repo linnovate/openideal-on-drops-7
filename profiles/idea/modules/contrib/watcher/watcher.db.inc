@@ -2,7 +2,7 @@
 /**
  * @file
  * Watcher DB layer
- * 
+ *
  * Watcher Module
  * by Jakob Persson of NodeOne <jakob@nodeone.se>
  * With ideas and feedback from Hans Dekker of Wordsy.com
@@ -59,7 +59,7 @@ function _watcher_db_get_watched_nodes_full($user = FALSE, $header = NULL) {
     $query->condition('n.status', 1);
     $query->condition('wn.uid', $user->uid);
     $query->addTag('node_access');
-    
+
     if ($header) {
       $query->extend('TableSort')
         ->orderByHeader($header);
@@ -184,10 +184,11 @@ function _watcher_db_set_nid_user($nid, $user, $what = NULL) {
   if (!$user->uid) {
     // If the user is anonymous, we first remove any already existing rows and replace
     // them to allow the user to alter previously set watches
+    // TODO: Will it really work for anonymous users?
     db_delete('watcher_nodes')
       ->condition('nid', $nid)
-      ->condition('uid', $uid)
-      ->condition('mail', $mail)
+      ->condition('uid', $user->uid)
+      ->condition('mail', $user->mail)
       ->execute();
   }
 

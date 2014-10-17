@@ -87,12 +87,52 @@ class Message extends Entity {
   /**
    * Generate an array for rendering the entity's content.
    *
+   * Iterate over the extra field settings, and show the visible partials.
+   *
    * @see entity_build_content()
    */
   public function buildContent($view_mode = 'full', $langcode = NULL) {
-    $content['text'] = array(
-      '#markup' => $this->getText($langcode),
-    );
+    // Get all the message text fields.
+    $content = array();
+    foreach (field_extra_fields_get_display('message', $this->type, $view_mode) as $key => $value) {
+      if (!$value['visible']) {
+        // Partial is hidden.
+        continue;
+      }
+
+      // Field name might have double underscore as-well, so we need to
+      // make sure we get it right. For this we inverse the string, and
+      // exlpode the first double-underscores.
+      // e.g. message__field-name__0
+      $inverse = strrev($key);
+      $argument = explode('__', $inverse, 2);
+      if (count($argument) != 2) {
+        continue;
+      }
+      $delta = strrev($argument[0]);
+      // "message__" is 9 chars.
+      $field_name = substr(strrev($argument[1]), 9);
+
+      if (!is_numeric($delta)) {
+        continue;
+      }
+
+      $field = field_info_field($field_name);
+      if (empty($field['settings']['message_text'])) {
+        continue;
+      }
+
+      $options = array(
+        'partials' => TRUE,
+        'partial delta' => $delta,
+        'field name' => $field_name,
+      );
+
+      $content['message__' . $field_name .'__' . $delta] = array(
+        '#markup' => $this->getText($langcode, $options),
+        '#weight' => $value['weight'],
+      );
+    }
     return entity_get_controller($this->entityType)->buildContent($this, $view_mode, $langcode, $content);
   }
 
@@ -182,7 +222,7 @@ class Message extends Entity {
    */
   public function save() {
     if (empty($this->is_new) || !empty($this->data['skip token hardcode'])) {
-      // Message isn't new, or message explicetly doesn't want token
+      // Message isn't new, or message explicitly doesn't want token
       // hardcoding
       parent::save();
       return;
@@ -192,7 +232,6 @@ class Message extends Entity {
     $token_options = !empty($this->data['token options']) ? $this->data['token options'] : array();
 
     $message_type = $this->getType();
-    $wrapper = entity_metadata_wrapper('message_type', $message_type);
 
     // Iterate over the text fields.
     $tokens = array();

@@ -1,0 +1,14 @@
+name = Bootstrap Panels Horizontal Tabs
+description = A Panels Styles plugin to make the title of each pane in a region turn into a tab to toggle display of the pane. Depends on Bootstrap Javascript and CSS which is not included with this module.
+package = Panels
+core = 7.x
+dependencies[] = panels
+files[] = bootstrap_panels_horizontal_tabs.module
+
+
+; Information added by drush on 2014-10-17
+version = "7.x-1.x-dev"
+core = "7.x"
+project = "bootstrap_panels_horizontal_tabs"
+datestamp = "1413555216"
+

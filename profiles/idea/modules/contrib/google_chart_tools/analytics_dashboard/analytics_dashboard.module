@@ -4,13 +4,13 @@
  */
 function analytics_dashboard_menu() {
   $items = array();
-  
+
   $items['admin/reports/analytics-dashboard'] = array(
     'title' => 'Analytics',
     'access arguments' => array('view analytics dashboard'),
     'page callback' => 'analytics_dashboard_page',
   );
-  
+
   // Settings page
   $items['admin/config/analytics-dashboard'] = array(
     'title' => 'Analytics dashboard configuration',
@@ -22,7 +22,6 @@ function analytics_dashboard_menu() {
     'file' => 'analytics_dashboard.admin.inc',
   );
 
-  
   return $items;
 }
 
@@ -32,11 +31,11 @@ function analytics_dashboard_menu() {
 function analytics_dashboard_permission() {
   return array(
     'administer analytics dashboard' => array(
-      'title' => t('Administer Analytics dashboard'), 
+      'title' => t('Administer Analytics dashboard'),
       'description' => t('Perform administration tasks for Analytics dashboard.'),
     ),
     'view analytics dashboard' => array(
-      'title' => t('View Analytics Dashboard'), 
+      'title' => t('View Analytics Dashboard'),
       'description' => t('View analytics dashboard.'),
     ),
   );
@@ -63,7 +62,7 @@ function analytics_dashboard_page() {
   $form = drupal_render($form);
   $charts = analytics_dashboard_get_charts();
   $visibles = variable_get('chart_visible', array());
-  $ret = $form; 
+  $ret = $form;
   $ret .= '<div id="charts">';
   foreach ($charts as $chart) {
     if (in_array($chart['id'], $visibles, TRUE)) {

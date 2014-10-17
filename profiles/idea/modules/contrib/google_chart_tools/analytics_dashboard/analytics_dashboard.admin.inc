@@ -18,7 +18,7 @@ function analytics_dashboard_admin_settings($form, &$form_state) {
 
   // Generate default charts selection
   $default = variable_get('chart_visible', array());
-  
+
   $form['display'] = array(
     '#type' => 'fieldset',
     '#title' => t('Display settings'),
@@ -32,6 +32,6 @@ function analytics_dashboard_admin_settings($form, &$form_state) {
     '#options' => $options,
     '#description' => t('The checked charts will be shown on the analytics page.'),
   );
-  
+
   return system_settings_form($form);
 }
