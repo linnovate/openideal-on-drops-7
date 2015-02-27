@@ -2,6 +2,7 @@
 
 define('DRAGDROPFILE_UPLOAD_METHOD', 'series');
 define('DRAGDROPFILE_CANCEL_ALL_DROPS', 0);
+define('DRAGDROPFILE_DEFAULT_ENABLED', 1);
 define('DRAGDROPFILE_SUBMIT_BUTTON_SELECTOR', '.i-am-dragdropfile');
 
 /**
@@ -22,6 +23,13 @@ function dragdropfile_menu() {
  * Config form handler for dragdropfile.
  */
 function dragdropfile_config_form($form, &$form_state) {
+  $form['dragdropfile_default_enabled'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable this widget by default on all managed files'),
+    '#default_value' => variable_get('dragdropfile_default_enabled', DRAGDROPFILE_DEFAULT_ENABLED),
+    '#description' => t("If checked the drag'n'drop widget option in fields settings will be checked by default."),
+  );
+
   $form['dragdropfile_upload_method'] = array(
     '#type' => 'select',
     '#title' => t('Upload method'),
@@ -123,8 +131,9 @@ function _dragdropfile_is_enabled($instance) {
     return $settings['dragdropfile_enabled'];
   }
 
-  // Or use default = ON, for the right widgets.
-  return TRUE;
+  // Or use the default value as set in module settings.
+  $default_value = variable_get('dragdropfile_default_enabled', DRAGDROPFILE_DEFAULT_ENABLED);
+  return $default_value;
 }
 
 /**

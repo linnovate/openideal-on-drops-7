@@ -66,3 +66,11 @@ features[variable][] = node_submitted_challenge
 features[variable][] = upload_challenge
 features[views_view][] = challenges_list
 features[views_view][] = ideas_in_challenge
+
+
+; Information added by drush on 2015-02-27
+version = "7.x-2.5+0-dev"
+core = "7.x"
+project = "idea"
+datestamp = "1425049340"
+

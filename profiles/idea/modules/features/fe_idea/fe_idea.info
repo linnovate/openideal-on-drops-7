@@ -129,3 +129,11 @@ features[views_view][] = ideas_all
 features[views_view][] = ideas_by_category
 features[views_view][] = ideas_in_action
 features[views_view][] = merged_ideas
+
+
+; Information added by drush on 2015-02-27
+version = "7.x-2.5+0-dev"
+core = "7.x"
+project = "idea"
+datestamp = "1425049340"
+

@@ -10,3 +10,11 @@ files[] = views/views_handler_filter_vote_only_user_uid.inc
 files[] = views/views_handler_argument_idea_comment_only_user_uid.inc
 files[] = views/views_handler_filter_idea_comment_only_user_uid.inc
 
+
+
+; Information added by drush on 2015-02-27
+version = "7.x-2.5+0-dev"
+core = "7.x"
+project = "idea"
+datestamp = "1425049340"
+

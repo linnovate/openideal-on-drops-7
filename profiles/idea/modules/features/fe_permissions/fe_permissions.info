@@ -24,3 +24,11 @@ features[user_permission][] = administer users
 features[user_permission][] = bypass node access
 features[user_permission][] = view analytics dashboard
 features[user_permission][] = view the administration theme
+
+
+; Information added by drush on 2015-02-27
+version = "7.x-2.5+0-dev"
+core = "7.x"
+project = "idea"
+datestamp = "1425049340"
+
